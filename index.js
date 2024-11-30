@@ -32,10 +32,24 @@ async function run() {
 
     const productsCollection = client.db("ztap").collection("products");
     const reviewsCollection = client.db("ztap").collection("reviews");
+    const userCollection = client.db("ztap").collection("users");
 
 
 
+    // Post users__
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
 
+    // Get user__
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = {userEmail: email};
+      const result = await userCollection.findOne(query)
+      res.send(result);
+    })
 
 
     // Get all products__
@@ -85,7 +99,6 @@ async function run() {
     })
 
     // Get reviews__
-
     app.get("/fewReviews", async (req, res) => {
       const query = req.query.limit || 6;
       const limit = parseInt(query);
