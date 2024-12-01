@@ -64,7 +64,7 @@ async function run() {
       const query = {};
 
       if (name) {
-        query.name = { $regex: name, $optiena: "i" };
+        query.name = { $regex: name, $options: "i" };
       }
 
       if (category) {
@@ -72,11 +72,11 @@ async function run() {
       }
 
       if (status) {
-        query.status = status;
+        query.productStatus = status;
       }
 
       if (size) {
-        query.size = size;
+        query.sizes = size;
       }
 
       const sortOption = sort === "asc" ? 1 : -1;
@@ -97,6 +97,19 @@ async function run() {
         .toArray();
         res.send(result);
     });
+
+    // Get size form products__
+    app.get("/sizes", async (req, res) => {
+      const result = await productsCollection
+      .aggregate([
+        {$unwind: "$sizes"},
+        {$group: {_id: "$sizes"}},
+        {$project: {_id: 0, sizes: "$_id"}}
+      ])
+      .toArray()
+      res.send(result);
+    })
+
 
     // Get all reviews__
     app.get("/reviews", async (req, res) => {
