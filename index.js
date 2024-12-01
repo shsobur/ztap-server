@@ -30,27 +30,27 @@ async function run() {
 
 
 
+
+
+
     const productsCollection = client.db("ztap").collection("products");
     const reviewsCollection = client.db("ztap").collection("reviews");
     const userCollection = client.db("ztap").collection("users");
-
-
 
     // Post users__
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
       res.send(result);
-    })
+    });
 
     // Get user__
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
-      const query = {userEmail: email};
-      const result = await userCollection.findOne(query)
+      const query = { userEmail: email };
+      const result = await userCollection.findOne(query);
       res.send(result);
-    })
-
+    });
 
     // Get all products__
     app.get("/products", async (req, res) => {
@@ -60,30 +60,43 @@ async function run() {
 
     // Get product for shoping__
     app.get("/allProducts", async (req, res) => {
-      const {name, category, status, size, sort} = req.query;
+      const { name, category, status, size, sort } = req.query;
       const query = {};
 
-      if(name) {
-        query.name = {$regex: name, $optiena: "i"};
+      if (name) {
+        query.name = { $regex: name, $optiena: "i" };
       }
 
-      if(category) {
+      if (category) {
         query.category = category;
       }
 
-      if(status) {
+      if (status) {
         query.status = status;
       }
 
-      if(size) {
+      if (size) {
         query.size = size;
       }
 
       const sortOption = sort === "asc" ? 1 : -1;
-      const result = await productsCollection.find(query).sort({newPrice: sortOption}).toArray();
+      const result = await productsCollection
+        .find(query)
+        .sort({ newPrice: sortOption })
+        .toArray();
       res.json(result);
-    })
+    });
 
+    // Get category from products__
+    app.get("/categorys", async (req, res) => {
+      const result = await productsCollection
+        .aggregate([
+          { $group: { _id: "$category" } },
+          { $project: { _id: 0, category: "$_id" } },
+        ])
+        .toArray();
+        res.send(result);
+    });
 
     // Get all reviews__
     app.get("/reviews", async (req, res) => {
@@ -110,7 +123,7 @@ async function run() {
 
     // Get top sells__
     app.get("/topSell", async (req, res) => {
-      const query = {productStatus: "topSell"};
+      const query = { productStatus: "topSell" };
       const options = {
         projection: {
           name: 1,
@@ -119,11 +132,11 @@ async function run() {
           savings: 1,
           category: 1,
           images: 1,
-        }
+        },
       };
       const result = await productsCollection.find(query, options).toArray();
       res.send(result);
-    })
+    });
 
     // Get reviews__
     app.get("/fewReviews", async (req, res) => {
@@ -131,7 +144,7 @@ async function run() {
       const limit = parseInt(query);
       const result = await reviewsCollection.find().limit(limit).toArray();
       res.send(result);
-    })
+    });
 
 
 
@@ -140,7 +153,12 @@ async function run() {
 
 
 
-    
+
+
+
+
+
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -151,11 +169,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
-
-
 
 app.get("/", (req, res) => {
   const result = "ZTAP server is running";
