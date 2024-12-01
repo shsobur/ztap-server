@@ -58,6 +58,33 @@ async function run() {
       res.send(result);
     });
 
+    // Get product for shoping__
+    app.get("/allProducts", async (req, res) => {
+      const {name, category, status, size, sort} = req.query;
+      const query = {};
+
+      if(name) {
+        query.name = {$regex: name, $optiena: "i"};
+      }
+
+      if(category) {
+        query.category = category;
+      }
+
+      if(status) {
+        query.status = status;
+      }
+
+      if(size) {
+        query.size = size;
+      }
+
+      const sortOption = sort === "asc" ? 1 : -1;
+      const result = await productsCollection.find(query).sort({newPrice: sortOption}).toArray();
+      res.json(result);
+    })
+
+
     // Get all reviews__
     app.get("/reviews", async (req, res) => {
       const result = await reviewsCollection.find().toArray();
