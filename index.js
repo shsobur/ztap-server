@@ -60,7 +60,7 @@ async function run() {
 
     // Get product for shoping__
     app.get("/allProducts", async (req, res) => {
-      const { name, category, status, size, sort } = req.query;
+      const { name, category, status, size, sort, limit = 9, page = 1 } = req.query;
       const query = {};
 
       if (name) {
@@ -79,12 +79,19 @@ async function run() {
         query.sizes = size;
       }
 
+      const limitNum = parseInt(limit);
+      const pageNum = parseInt(page);
+
       const sortOption = sort === "asc" ? 1 : -1;
       const result = await productsCollection
-        .find(query)
-        .sort({ newPrice: sortOption })
-        .toArray();
-      res.json(result);
+      .find(query)
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .sort({ newPrice: sortOption })
+      .toArray();
+
+      const totalProduct = await productsCollection.countDocuments(query);
+      res.json({result, totalProduct});
     });
 
     // Get category from products__
