@@ -174,6 +174,17 @@ async function run() {
       res.send(result);
     });
 
+    // Get specific product review__
+    app.get("/productReview/:code", async (req, res) => {
+      const productCode = req.params.code;
+      const reviews = await reviewsCollection.find({reviewCode: productCode}).toArray();
+
+      if(reviews.length === 0) {
+        return res.status(404).send({massage: "No reviews found for this product."})
+      }
+
+      res.status(200).send(reviews);
+    })
 
 
 
