@@ -102,6 +102,18 @@ async function run() {
       res.send(result);
     })
 
+    // Get same categoryes products__
+    app.get("/sameProducts", async (req, res) => {
+      const {category, id} = req.query;
+      const query = {
+        category: category,
+        _id: {$ne: new ObjectId(id)}
+      }
+
+      const result = await productsCollection.find(query).toArray();
+      res.status(200).send(result);
+    })
+
     // Get category from products__
     app.get("/categorys", async (req, res) => {
       const result = await productsCollection
@@ -177,7 +189,8 @@ async function run() {
     // Get specific product review__
     app.get("/productReview/:code", async (req, res) => {
       const productCode = req.params.code;
-      const reviews = await reviewsCollection.find({reviewCode: productCode}).toArray();
+      const query = {reviewCode: productCode}
+      const reviews = await reviewsCollection.find(query).toArray();
 
       if(reviews.length === 0) {
         return res.status(404).send({massage: "No reviews found for this product."})
