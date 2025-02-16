@@ -36,6 +36,7 @@ async function run() {
     const productsCollection = client.db("ztap").collection("products");
     const reviewsCollection = client.db("ztap").collection("reviews");
     const userCollection = client.db("ztap").collection("users");
+    const cartCollection = client.db("ztap").collection("carts");
 
     // Post users__
     app.post("/users", async (req, res) => {
@@ -137,6 +138,20 @@ async function run() {
       res.send(result);
     })
 
+    // Post cart__
+    app.post("/cart", async (req, res) => {
+      const query = req.body;
+      const result = await cartCollection.insertOne(query);
+      res.send(result);
+    })
+
+    // Get cart__
+    app.get("/carts", async (req, res) => {
+      const email = req.query.email;
+      const query = {userEmail: email};
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    })
 
     // Get all reviews__
     app.get("/reviews", async (req, res) => {
